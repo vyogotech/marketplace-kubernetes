@@ -1,4 +1,5 @@
-# frappe-operator/frappe-operator
+# Vyogo Frappe & ERPNext Operator for Kubernetes
+# Developed by Vyogo Technologies (https://vyogo.tech)
 # Chart source: https://github.com/vyogotech/frappe-operator/tree/release/helm/frappe-operator
 # Full default values: helm show values frappe-operator/frappe-operator
 
@@ -32,3 +33,8 @@ openebs-nfs:
   nfsStorageClass:
     name: nfs-rwx-storage
     backendStorageClass: "do-block-storage"
+    filePermissions:
+      UID: "1001"
+      GID: "0"
+      mode: "0775"
+
