@@ -1,6 +1,6 @@
-# Vyogo Frappe & ERPNext Operator 1-Click for DigitalOcean Kubernetes
+# Open Source ERPNext, CRM & HRMS Operator by Vyogo (DigitalOcean 1-Click)
 
-The **Frappe & ERPNext Operator**, developed by **[Vyogo Technologies](https://vyogo.tech)**, enables you to deploy Frappe Framework and any Frappe app — including ERPNext, CRM, HRMS, and custom apps — in a completely declarative way on DigitalOcean Kubernetes. Powered by the FPM (Frappe Package Manager) catalog, the operator can install any cataloged app in a flash without the overhead of building or maintaining custom container images for every combination. Describe a bench and its sites in YAML, and Vyogo's operator automatically provisions databases, runs migrations, takes backups, manages multi-node RWX storage, and automates ingress routing.
+The **Open Source ERPNext, CRM & HRMS Operator**, developed by **[Vyogo Technologies](https://vyogo.tech)**, enables you to deploy open-source Frappe Framework and business apps — including ERPNext, CRM, HRMS, and custom apps — in a completely declarative way on DigitalOcean Kubernetes. Powered by the FPM (Frappe Package Manager) catalog, the operator can install any cataloged app in a flash without the overhead of building or maintaining custom container images for every combination. Describe a bench and its sites in YAML, and Vyogo's operator automatically provisions databases, runs migrations, takes backups, manages multi-node RWX storage, and automates ingress routing.
 
 It natively supports both **MariaDB** and **PostgreSQL** database engines out of the box.
 
