@@ -1,45 +1,32 @@
 # frappe-operator/frappe-operator
 # Chart source: https://github.com/vyogotech/frappe-operator/tree/release/helm/frappe-operator
 # Full default values: helm show values frappe-operator/frappe-operator
-#
-# Keep this file MINIMAL. DigitalOcean's runner fetches it from the master branch
-# of digitalocean/marketplace-kubernetes at install time, so every change here
-# needs a PR to that repo plus a re-submission in the Vendor Portal. Anything that
-# can be defaulted in our own chart should be defaulted there instead, where we
-# ship on our own cadence.
 
-# The 1-click installs only the control plane. deploy.sh runs helm with
-# --atomic --timeout 8m0s, so if the release does not converge in eight minutes
-# the whole thing rolls back and the user sees a failed install. Pulling ERPNext
-# images and provisioning a database will not fit in that window, so the sample
-# bench and site stay off; users create their first bench after install.
+# The 1-click installs only the control plane.
 examples:
   createBench: false
   createSite: false
 
-# MariaDB Operator and KEDA are bundled as subcharts and are on by default in the
-# chart. They are listed here so the 1-click's behaviour is explicit rather than
-# inherited silently -- a reader of this file should not have to go read our
-# values.yaml to know what a one-click install actually creates.
+# MariaDB Operator (bundled subchart) for MariaDB database provisioning
 mariadb-operator:
   enabled: true
   crds:
     enabled: true
 
+# KEDA (bundled subchart) for Frappe worker autoscaling
 keda:
   enabled: true
   crds:
     install: true
 
-# Not set here, deliberately:
-#
-# Ingress controller and cert-manager. DOKS ships neither, so a FrappeSite has no
-# route in from outside the cluster until one is installed. They are prerequisites
-# rather than part of this chart, and installing an ingress controller also
-# provisions a DigitalOcean Load Balancer, which is a billable resource the user
-# has not agreed to from a 1-click button. The listing documents this instead.
-#
-# Storage. storageClassName is left empty so the cluster default is used, which on
-# DOKS is do-block-storage. That provisioner is ReadWriteOnce only, and the
-# operator detects this and falls back to RWO for bench volumes -- correct, but it
-# does mean a bench's pods are scheduled to a single node.
+# NGINX Ingress Controller (bundled subchart) for routing traffic to sites
+ingress-nginx:
+  enabled: true
+
+# OpenEBS Dynamic NFS Provisioner (bundled subchart) providing the 'nfs-rwx-storage'
+# StorageClass for multi-replica benches backed by DigitalOcean block storage.
+openebs-nfs:
+  enabled: true
+  nfsStorageClass:
+    name: nfs-rwx-storage
+    backendStorageClass: "do-block-storage"
