@@ -7,7 +7,9 @@ examples:
   createBench: false
   createSite: false
 
-# MariaDB Operator (bundled subchart) for MariaDB database provisioning
+# MariaDB Operator (bundled subchart) for MariaDB database provisioning.
+# Installed by default as MariaDB is Frappe's primary database engine.
+# If you are using external databases or DO Managed PostgreSQL, set enabled: false.
 mariadb-operator:
   enabled: true
   crds:

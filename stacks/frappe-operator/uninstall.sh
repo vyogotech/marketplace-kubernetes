@@ -12,21 +12,13 @@ helm uninstall "$STACK" \
   --namespace "$NAMESPACE"
 
 ################################################################################
-# StackGres is deliberately left installed
+# Database resources and CRDs are preserved
 ################################################################################
-# Removing it would take every SGCluster with it, and those hold the site
-# databases this operator created. Uninstalling the control plane must not
-# destroy the data it was managing.
-#
-# To remove it once you have confirmed nothing depends on it:
-#
-#   kubectl get sgclusters -A
-#   helm uninstall stackgres-operator -n stackgres
-#
+# Uninstalling the operator Helm release removes the controller and bundled subcharts.
+# Site databases (MariaDB CRs, external DBs, or optional PostgreSQL clusters)
+# and persistent volumes are preserved so tenant data is never destroyed.
 if kubectl get deployment stackgres-operator -n stackgres >/dev/null 2>&1; then
   echo ""
-  echo "The StackGres PostgreSQL Operator is still installed in namespace 'stackgres'."
-  echo "It was left in place because removing it would delete the SGCluster resources"
-  echo "holding your site databases. Check 'kubectl get sgclusters -A' before removing"
-  echo "it with 'helm uninstall stackgres-operator -n stackgres'."
+  echo "Note: StackGres PostgreSQL Operator is running in namespace 'stackgres'."
+  echo "It was left in place to protect any active database clusters."
 fi

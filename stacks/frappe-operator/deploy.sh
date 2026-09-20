@@ -2,29 +2,6 @@
 
 set -e
 
-################################################################################
-# prerequisite: StackGres PostgreSQL Operator
-################################################################################
-# Supports PostgreSQL alongside MariaDB. Frappe Operator provisions SGCluster
-# resources when sites specify dbConfig.provider: postgres.
-# Installed in its own namespace and kept outside the --atomic call so that any
-# operator upgrades or rollbacks do not interrupt active database instances.
-STACKGRES_NAMESPACE="stackgres"
-
-if ! kubectl get crd sgclusters.stackgres.io >/dev/null 2>&1; then
-  echo "Installing StackGres PostgreSQL Operator..."
-  helm repo add stackgres https://stackgres.io/downloads/stackgres-k8s/stackgres/helm
-  helm repo update > /dev/null
-
-  helm upgrade stackgres-operator stackgres/stackgres-operator \
-    --install \
-    --namespace "$STACKGRES_NAMESPACE" \
-    --create-namespace \
-    --wait \
-    --timeout 6m0s
-
-  kubectl wait --for condition=established --timeout=120s crd sgclusters.stackgres.io
-fi
 
 ################################################################################
 # repo

@@ -17,8 +17,7 @@ It natively supports both **MariaDB** and **PostgreSQL** database engines out of
 ## What gets installed
 
 - **Frappe Operator** in `frappe-operator-system` namespace.
-- **MariaDB Operator**, for automatic provisioning of MariaDB site databases.
-- **StackGres Operator** in `stackgres` namespace, for automatic provisioning of dedicated PostgreSQL clusters.
+- **MariaDB Operator**, for automatic provisioning of MariaDB site databases (Frappe's primary database engine).
 - **KEDA**, for event-driven autoscaling of Frappe workers.
 - **NGINX Ingress Controller**, pre-wired to the operator for HTTP/HTTPS routing to sites.
 - **OpenEBS Dynamic NFS Provisioner**, exposing the `nfs-rwx-storage` StorageClass for ReadWriteMany (RWX) multi-replica benches.
@@ -27,15 +26,17 @@ No bench or site is created during install. You create your first bench after in
 
 ## Databases
 
-The operator supports MariaDB, PostgreSQL, and external databases. Both MariaDB and PostgreSQL operators are included:
+Frappe Framework supports **MariaDB** and **PostgreSQL** (MySQL is not supported).
 
 | Engine | Mode | Provisioner |
 |---|---|---|
-| **MariaDB** (default) | shared or dedicated | MariaDB Operator (bundled subchart) |
-| **PostgreSQL** | dedicated | StackGres Operator (installed in `stackgres`) |
-| **PostgreSQL** | shared | DO Managed PostgreSQL (or any reachable `host:port`) |
+| **MariaDB** (default) | shared or dedicated | MariaDB Operator (bundled subchart) or External MariaDB |
+| **PostgreSQL** | shared | DigitalOcean Managed PostgreSQL (or external PostgreSQL) |
+| **PostgreSQL** | dedicated | StackGres / Percona Operator (opt-in) |
 
-### Example 1: FrappeBench with MariaDB (Default)
+### Example 1: FrappeSite with MariaDB (Default)
+
+MariaDB databases and users are provisioned automatically by the bundled MariaDB Operator:
 
 ```yaml
 apiVersion: vyogo.tech/v1
@@ -65,16 +66,83 @@ spec:
     mode: shared
 ```
 
-### Example 2: FrappeBench with PostgreSQL (StackGres)
+### Example 2: FrappeSite with DigitalOcean Managed PostgreSQL
+
+When using DigitalOcean Managed PostgreSQL, Frappe Operator provisions the site database and role automatically via a lightweight Kubernetes batch Job using your cluster's connection credentials, without requiring in-cluster database operators:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: do-postgres-creds
+  namespace: default
+type: Opaque
+stringData:
+  user: doadmin
+  password: "<YOUR_MANAGED_PG_PASSWORD>"
+---
+apiVersion: vyogo.tech/v1
+kind: FrappeSite
+metadata:
+  name: pg-site-local
+  namespace: default
+spec:
+  benchRef:
+    name: pg-bench
+  siteName: pgsite.local
+  domain: pgsite.local
+  dbConfig:
+    provider: postgres
+    mode: shared
+    host: "db-postgresql-nyc1-12345-do-user-12345-0.b.db.ondigitalocean.com"
+    port: "25060"
+    postgresRef:
+      name: do-postgres-creds
+```
+
+### Example 3: Dedicated PostgreSQL via StackGres (Post-Deploy Installation)
+
+If you require per-site dedicated PostgreSQL clusters running directly inside your Kubernetes cluster instead of managed databases, you can install the **StackGres Operator** at any time after the 1-Click deploy.
+
+#### 1. Install StackGres Operator
+
+```bash
+helm repo add stackgres https://stackgres.io/downloads/stackgres-k8s/stackgres/helm
+helm repo update
+
+helm upgrade --install stackgres-operator stackgres/stackgres-operator \
+  --namespace stackgres \
+  --create-namespace \
+  --wait
+```
+
+#### 2. Reconfiguring Frappe Operator
+
+- **RBAC & Discovery**: Frappe Operator's ClusterRole is already pre-configured with full permissions for StackGres custom resources (`sgclusters.stackgres.io`, `sginstanceprofiles`, `sgpgconfigs`, `sgpoolconfigs`, `sgscripts`). The operator uses dynamic client resolution to discover StackGres automatically once installed.
+- **Refresh Discovery (Recommended)**: To immediately refresh the Kubernetes API discovery cache on the running operator:
+  ```bash
+  kubectl rollout restart deployment/frappe-operator-controller-manager -n frappe-operator-system
+  ```
+- **Optional - Disable MariaDB Operator**: If you are only using PostgreSQL and want to free up cluster resources (RAM/CPU) by turning off the bundled MariaDB Operator:
+  ```bash
+  helm upgrade frappe-operator frappe-operator/frappe-operator \
+    --namespace frappe-operator-system \
+    --reuse-values \
+    --set mariadb-operator.enabled=false
+  ```
+
+#### 3. Deploy a Dedicated PostgreSQL Site
+
+> **Note**: Frappe PostgreSQL support is available on Frappe develop / v17 branch. Ensure your bench image supports Postgres.
 
 ```yaml
 apiVersion: vyogo.tech/v1
 kind: FrappeBench
 metadata:
-  name: postgres-bench
+  name: pg-bench
   namespace: default
 spec:
-  frappeVersion: "version-15"
+  frappeVersion: "develop"
   storageClassName: "nfs-rwx-storage"
   apps:
     - name: erpnext
@@ -83,18 +151,20 @@ spec:
 apiVersion: vyogo.tech/v1
 kind: FrappeSite
 metadata:
-  name: site2-local
+  name: pg-dedicated-site
   namespace: default
 spec:
   benchRef:
-    name: postgres-bench
-  siteName: site2.local
-  domain: site2.local
+    name: pg-bench
+  siteName: pgsite.local
+  domain: pgsite.local
   dbConfig:
     provider: postgres
     mode: dedicated
     postgresEngine: stackgres
 ```
+
+The Frappe Operator will automatically provision an `SGCluster` and database user via StackGres for this site.
 
 ## Storage (ReadWriteMany / RWX)
 
@@ -128,7 +198,6 @@ Verify:
 
 ```bash
 kubectl get pods -n frappe-operator-system
-kubectl get pods -n stackgres
 kubectl get storageclass
 ```
 
