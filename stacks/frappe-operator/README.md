@@ -1,6 +1,8 @@
 # Open Source ERPNext, CRM & HRMS Operator by Vyogo (DigitalOcean 1-Click)
 
-The **Open Source ERPNext, CRM & HRMS Operator**, developed by **[Vyogo Technologies](https://vyogo.tech)**, enables you to deploy open-source Frappe Framework and business apps — including ERPNext, CRM, HRMS, and custom apps — in a completely declarative way on DigitalOcean Kubernetes. Powered by the FPM (Frappe Package Manager) catalog, the operator can install any cataloged app in a flash without the overhead of building or maintaining custom container images for every combination. Describe a bench and its sites in YAML, and Vyogo's operator automatically provisions databases, runs migrations, takes backups, manages multi-node RWX storage, and automates ingress routing.
+The **Open Source ERPNext, CRM & HRMS Operator**, developed by **[Vyogo Technologies](https://vyogo.tech)**, enables you to deploy open-source Frappe Framework and business apps — including ERPNext, CRM, HRMS, and custom apps — in a completely declarative way on DigitalOcean Kubernetes. Powered by the FPM (Frappe Package Manager) catalog ([fpm.vyogo.tech](https://fpm.vyogo.tech)), the operator can install any cataloged app in a flash without the overhead of building or maintaining custom container images for every combination. Describe a bench and its sites in YAML, and Vyogo's operator automatically provisions databases, runs migrations, takes backups, manages multi-node RWX storage, and automates ingress routing.
+
+> **Looking for managed hosting?** If you prefer a fully managed cloud solution without managing Kubernetes clusters, visit **[console.vyogo.cloud](https://console.vyogo.cloud)**.
 
 It natively supports both **MariaDB** and **PostgreSQL** database engines out of the box.
 
@@ -199,15 +201,20 @@ kubectl get storageclass
 Run `upgrade.sh` to move to a newer chart version, and `uninstall.sh` to remove the
 release. Database data and CRDs are preserved on uninstall.
 
-## About Vyogo Technologies
+## About Vyogo Technologies & Managed Hosting
 
-The Frappe & ERPNext Operator is designed, engineered, and maintained by **[Vyogo Technologies](https://vyogo.tech)**. It is an independent enterprise Kubernetes operator for running Frappe Framework, ERPNext, and custom Frappe applications at scale in production environments.
+The Frappe & ERPNext Operator is designed, engineered, and maintained by **[Vyogo Technologies](https://vyogo.tech)**. It is an independent enterprise Kubernetes operator for running Frappe Framework, ERPNext, CRM, HRMS, and custom Frappe applications at scale in production environments.
+
+- **Managed Cloud**: For fully managed hosting with automated backups, scaling, and zero-maintenance operations, visit **[console.vyogo.cloud](https://console.vyogo.cloud)**.
+- **App Catalog**: Browse hundreds of supported apps at **[fpm.vyogo.tech](https://fpm.vyogo.tech)**.
 
 *Notice: Frappe Framework and ERPNext are open-source trademarks of Frappe Technologies Pvt. Ltd. This operator is an independent product developed and maintained by Vyogo Technologies and is not affiliated with or endorsed by Frappe Technologies.*
 
 ## License and support
 
 The Frappe & ERPNext Operator by Vyogo Technologies is licensed under the [Elastic License 2.0](https://github.com/vyogotech/frappe-operator/blob/release/LICENSE).
+- Managed Cloud: https://console.vyogo.cloud
+- App Catalog: https://fpm.vyogo.tech
 - Website: https://vyogo.tech
 - GitHub: https://github.com/vyogotech/frappe-operator
 - Documentation: https://vyogotech.github.io/frappe-operator/
